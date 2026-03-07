@@ -17,6 +17,6 @@ data_router = APIRouter(
 
 
 @data_router.post("/upload/{project_id}")
-async def upload_file(project_id: str,app_request: Request,files: List[UploadFile]= File(...),settings: Settings = Depends(get_settings)):
+async def upload_file(project_id: str,app_request: Request,files: List[UploadFile]= File(...)):
     pass
     

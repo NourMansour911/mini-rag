@@ -1,7 +1,7 @@
 # Auto-generated __init__.py
 
 from . import base_repo
-from .BaseRepo import BaseRepo
+from .base_repo import BaseRepo
 from . import chunk_repo
 from .chunk_repo import ChunkRepo
 from . import file_repo
@@ -14,7 +14,7 @@ __all__ = [
     "chunk_repo",
     "file_repo",
     "project_repo",
-    "base_repo",
+    "BaseRepo",
     "ChunkRepo",
     "FileRepo",
     "ProjectRepo",

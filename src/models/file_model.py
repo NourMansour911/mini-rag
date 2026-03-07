@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from datetime import datetime
 
 class FileModel(BaseModel):
-    iid: Optional[ObjectId] = Field(None, alias="_id")
+    file_iid: Optional[ObjectId] = Field(None, alias="_id")
     file_project_iid: ObjectId
     file_type: str = Field(default="file", min_length=1)
     file_name: str = Field(..., min_length=1)

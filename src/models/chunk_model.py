@@ -8,7 +8,7 @@ class ChunkModel(BaseModel):
     chunk_metadata: dict
     chunk_order: int = Field(..., gt=0)
     chunk_project_iid: ObjectId
-    chunk_asset_iid: Optional[ObjectId]
+    chunk_file_iid: Optional[ObjectId]
 
 
     model_config = {  

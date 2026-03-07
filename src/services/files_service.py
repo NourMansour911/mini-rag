@@ -66,7 +66,7 @@ class FileService(BaseService):
         return file_path, random_name
     
     async def write_file(self, file: UploadFile, project_id: str):
-        file_path, file_id = self.generate_file_path(original_filename=file.filename, project_id=project_id)
+        file_path, file_name = self.generate_file_path(original_filename=file.filename, project_id=project_id)
         logger.info(f"Writing file to path: {file_path}")
 
         try:
@@ -78,4 +78,4 @@ class FileService(BaseService):
             logger.error(f"Error writing file {file.filename}: {e}", exc_info=True)
             raise
 
-        return file_path, file_id
+        return file_path, file_name
