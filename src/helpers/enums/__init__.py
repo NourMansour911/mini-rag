@@ -2,12 +2,12 @@
 
 from . import db_enum
 from .db_enum import DBEnum
-from . import signal_enum
-from .signal_enum import SignalEnum
+from . import signals_enum
+from .signals_enum import Signals
 
 __all__ = [
     "db_enum",
-    "signal_enum",
+    "signals_enum",
     "DBEnum",
-    "SignalEnum",
+    "Signals",
 ]

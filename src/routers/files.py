@@ -4,6 +4,8 @@ from typing import List
 import logging
 from repos import ChunkRepo,ProjectRepo,FileRepo
 from models import ChunkModel,FileModel, ProjectModel
+from helpers.config import get_settings,Settings
+
 
 
 logger = logging.getLogger('uvicorn.error')
@@ -15,6 +17,6 @@ data_router = APIRouter(
 
 
 @data_router.post("/upload/{project_id}")
-async def upload_file(project_id: str,app_request: Request,files: List[UploadFile]= File(...)):
+async def upload_file(project_id: str,app_request: Request,files: List[UploadFile]= File(...),settings: Settings = Depends(get_settings)):
     pass
     

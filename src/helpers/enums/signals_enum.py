@@ -1,6 +1,6 @@
 from enum import Enum
 
-class SignalEnum(Enum):
+class Signals(Enum):
     FILE_SIZE_EXCEEDED = "File Size Exceeded"
     FILE_TYPE_NOT_ALLOWED = "File Type Not Allowed"
     FILE_UPLOAD_SUCCESS = "File Uploaded Successfully"
