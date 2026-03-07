@@ -18,5 +18,6 @@ files_router = APIRouter(
 
 @files_router.post("/upload/{project_id}")
 async def upload_file(project_id: str,app_request: Request,files: List[UploadFile]= File(...)):
-    return await FilesController.upload_files(app_request=app_request,project_id=project_id,files=files)
+    controller = FilesController()
+    return await controller.upload_files(app_request=app_request,project_id=project_id,files=files)
     

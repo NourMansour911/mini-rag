@@ -10,7 +10,7 @@ logger = get_logger("files_controller")
 
 class FilesController:
 
-    @staticmethod
+    
     async def upload_files(self, project_id: str, app_request: Request, files: List[UploadFile] = File(...)):
       try:
              
@@ -42,18 +42,18 @@ class FilesController:
                 _, file_name = await file_service.write_file(file=file, project_id=project.project_id)
                 
                 file_model = FileModel(
-                    file_name=file.filename,
+                    file_name=file_name,
                     file_size=file.size,
                     file_project_iid=project.iid
                 )
 
                 saved_file = await file_repo.add_file(file_model)
-                logger.info(f"File saved successfully: {file.filename} | File ID: {str(saved_file.file_iid)}")
+                logger.info(f"File saved successfully: {file.filename} as {file_name} | File ID: {str(saved_file.file_iid)}")
 
                 response_list.append({
-                    "filename": file.filename,
+                    "filename": file_name,
                     "status": "success",
-                    "file_id": str(saved_file.file_iid) 
+                    "file_db_id": str(saved_file.file_iid) 
                 })
 
             except Exception as e:
