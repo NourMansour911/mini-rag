@@ -1,8 +1,8 @@
-from ..BaseDataModel import BaseDataModel
-from .project_entity import Project
+from src.repos.base_repo import BaseRepo
+from models import ProjectModel
 from helpers.enums import DBEnum
 
-class ProjectModel(BaseDataModel):
+class ProjectRepo(BaseRepo):
 
     def __init__(self, db_client: object):
         super().__init__(db_client=db_client)
@@ -19,14 +19,14 @@ class ProjectModel(BaseDataModel):
         all_collections = await self.db_client.list_collection_names()
         if DBEnum.COLLECTION_PROJECT_NAME.value not in all_collections:
             self.collection = self.db_client[DBEnum.COLLECTION_PROJECT_NAME.value]
-            indexes = Project.get_indexes()
+            indexes = ProjectModel.get_indexes()
             for index in indexes:
                 await self.collection.create_index(
                     index["key"],
                     name=index["name"],
                     unique=index["unique"]
                 )
-    async def create_project(self, project: Project):
+    async def create_project(self, project: ProjectModel):
 
         
         result = await self.collection.insert_one(project.model_dump(by_alias=True, exclude_unset=True))
@@ -42,12 +42,12 @@ class ProjectModel(BaseDataModel):
 
         if record is None:
             # create new project
-            project = Project(project_id=project_id)
+            project = ProjectModel(project_id=project_id)
             project = await self.create_project(project=project)
 
             return project
         
-        return Project(**record)
+        return ProjectModel(**record)
 
     async def get_all_projects(self, page: int=1, page_size: int=10):
 
@@ -63,7 +63,7 @@ class ProjectModel(BaseDataModel):
         projects = []
         async for document in cursor:
             projects.append(
-                Project(**document)
+                ProjectModel(**document)
             )
 
         return projects, total_pages

@@ -1,13 +1,21 @@
 # Auto-generated __init__.py
 
-from . import assets
-from . import controllers
 from . import helpers
-from . import repo
+from . import main
+from .main import lifespan
+from . import models
+from . import repos
+from . import routers
+from . import services
+from . import assets
 
 __all__ = [
-    "assets",
-    "controllers",
     "helpers",
-    "repo",
+    "main",
+    "models",
+    "repos",
+    "routers",
+    "services",
+    "assets",
+    "lifespan",
 ]

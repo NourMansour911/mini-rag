@@ -3,7 +3,7 @@ from typing import Optional
 from bson.objectid import ObjectId
 from datetime import datetime
 
-class File(BaseModel):
+class FileModel(BaseModel):
     iid: Optional[ObjectId] = Field(None, alias="_id")
     file_project_iid: ObjectId
     file_type: str = Field(default="file", min_length=1)

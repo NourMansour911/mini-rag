@@ -1,10 +1,11 @@
-from ..BaseDataModel import BaseDataModel
-from .file_entity import File
+from src.repos.base_repo import BaseRepo
+from models import FileModel
+from models import File
 from helpers.enums import DBEnum
 from bson import ObjectId
 
 
-class FileModel(BaseDataModel):
+class FileRepo(BaseRepo):
 
     def __init__(self, db_client: object):
         super().__init__(db_client=db_client)
