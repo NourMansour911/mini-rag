@@ -1,4 +1,4 @@
-from routers import base,data
+from routers import base,files
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
@@ -22,4 +22,4 @@ app = FastAPI(lifespan=lifespan)
 
 
 app.include_router(base.base_router)
-app.include_router(data.data_router)
+app.include_router(files.files_router)

@@ -1,4 +1,4 @@
-from src.repos.base_repo import BaseRepo
+from repos import BaseRepo
 from models import ProjectModel
 from helpers.enums import DBEnum
 from bson import ObjectId

@@ -10,6 +10,7 @@ logger = get_logger("files_controller")
 
 class FilesController:
 
+    @staticmethod
     async def upload_files(self, project_id: str, app_request: Request, files: List[UploadFile] = File(...)):
       try:
              

@@ -1,4 +1,4 @@
-from src.repos.base_repo import BaseRepo
+from repos import BaseRepo
 from models import ChunkModel
 from helpers.enums import DBEnum
 from bson.objectid import ObjectId

@@ -1,4 +1,4 @@
-from base_service import BaseService
+from .base_service import BaseService
 from fastapi import UploadFile,status
 from fastapi.responses import JSONResponse
 import os

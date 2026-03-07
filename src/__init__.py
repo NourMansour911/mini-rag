@@ -3,6 +3,7 @@
 from . import assets
 from . import controllers
 from . import helpers
+from . import logs
 from . import main
 from .main import lifespan
 from . import models
@@ -14,6 +15,7 @@ __all__ = [
     "assets",
     "controllers",
     "helpers",
+    "logs",
     "main",
     "models",
     "repos",
