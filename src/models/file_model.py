@@ -6,11 +6,11 @@ from datetime import datetime
 class FileModel(BaseModel):
     file_iid: Optional[ObjectId] = Field(None, alias="_id")
     file_project_iid: ObjectId
-    file_type: str = Field(default_factory=lambda: "file", min_length=1)
+    file_type: str = Field(default="file", min_length=1)
     file_name: str = Field(..., min_length=1)
     file_size: int = Field(ge=0, default=None)
-    file_config: dict = Field(default_factory=dict)
-    file_pushed_at: datetime = Field(default_factory=datetime.now)
+    file_config: Optional[dict] = None
+    file_pushed_at: datetime = Field(default=datetime.now())
 
     model_config = {  
         "arbitrary_types_allowed": True, 
@@ -30,7 +30,7 @@ class FileModel(BaseModel):
             },
             {
                 "key": [
-                    ("file_project_iid", 1),
+                    ("file_project_id", 1),
                     ("file_name", 1)
                 ],
                 "name": "file_name_with_project_iid_index_1",

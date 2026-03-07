@@ -30,7 +30,7 @@ class ChunkRepo(BaseRepo):
                 )
 
     async def create_chunk(self, chunk: ChunkModel):
-        result = await self.collection.insert_one(chunk.model_dump(by_alias=True, exclude_unset=True))
+        result = await self.collection.insert_one(chunk.model_dump(by_alias=True, exclude_none=True))
         chunk.iid = result.inserted_id
         return chunk
 
@@ -51,7 +51,7 @@ class ChunkRepo(BaseRepo):
             batch = chunks[i:i+batch_size]
 
             operations = [
-                InsertOne(chunk.dict(by_alias=True, exclude_unset=True))
+                InsertOne(chunk.dict(by_alias=True, exclude_none=True))
                 for chunk in batch
             ]
 

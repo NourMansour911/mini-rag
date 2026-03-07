@@ -47,7 +47,7 @@ class FileRepo(BaseRepo):
 
     async def add_file(self, file: FileModel):
         try:
-            result = await self.collection.insert_one(file.model_dump(by_alias=True, exclude_unset=True))
+            result = await self.collection.insert_one(file.model_dump(by_alias=True, exclude_none=True))
             file.file_iid = result.inserted_id
             logger.info(f"File added successfully with ID: {file.file_iid}")
             return file

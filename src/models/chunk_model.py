@@ -3,9 +3,9 @@ from typing import Optional
 from bson.objectid import ObjectId
 
 class ChunkModel(BaseModel):
-    iid: Optional[ObjectId] = Field(None, alias="_id")
+    iid: ObjectId = Field(..., alias="_id")
     chunk_text: str = Field(..., min_length=1)
-    chunk_metadata: dict = Field(default_factory=dict)  
+    chunk_metadata: Optional[dict] = None 
     chunk_order: int = Field(..., gt=0)
     chunk_project_iid: ObjectId
     chunk_file_iid: Optional[ObjectId] = None 
