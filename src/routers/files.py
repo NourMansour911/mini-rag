@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, Request,File
+from fastapi import APIRouter, UploadFile, Request,File,Depends
 
 from typing import List
 import logging
@@ -13,11 +13,18 @@ files_router = APIRouter(
     tags=["api_v1", "files"],
 )
 
-service = FilesService()
+def get_files_service():
+    return FilesService()
+
+def get_db_client(request: Request):
+    return request.app.db_client
 
 @files_router.post("/upload/{project_id}",response_model=UploadResponse)
-async def upload_files(project_id: str,app_request: Request,files: List[UploadFile]= File(...)):
-    return await service.upload_files(db_client=app_request.app.db_client,project_id=project_id,files=files)
+async def upload_files(project_id: str,files: List[UploadFile]= File(...),service: FilesService = Depends(get_files_service),db_client = Depends(get_db_client)):
+    return await service.upload_files(db_client=db_client,project_id=project_id,files=files)
+
+
+
 
 
 
