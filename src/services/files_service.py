@@ -10,6 +10,8 @@ from helpers.logger import get_logger
 from repos import  ProjectRepo, FileRepo
 from models import  FileModel
 from typing import List
+from models.schemas import ChunkingRequest
+
 
 logger = get_logger("self")  # Logger for this layer
 
@@ -167,3 +169,7 @@ class FilesService(BaseService):
             "project_db_id": str(project.iid),
             "files": response_list
         }   
+        
+        
+    async def chunking(self,project_id: str,db_client,request_schema: ChunkingRequest):
+        pass

@@ -5,6 +5,9 @@ import logging
 from models.schemas import UploadResponse
 
 from services import FilesService
+from models.schemas import ChunkingRequest
+
+
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -24,7 +27,9 @@ async def upload_files(project_id: str,files: List[UploadFile]= File(...),servic
     return await service.upload_files(db_client=db_client,project_id=project_id,files=files)
 
 
-
+@files_router.post("/chunking/{project_id}")
+async def chunking(project_id: str,request_schema: ChunkingRequest,service: FilesService = Depends(get_files_service),db_client = Depends(get_db_client)):
+    return await service.chunking(db_client=db_client,project_id=project_id)
 
 
 
