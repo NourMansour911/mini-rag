@@ -3,11 +3,11 @@
 from . import base
 from .base import root
 from . import files
-from .files import upload_file
+from .files import upload_files
 
 __all__ = [
     "base",
     "files",
     "root",
-    "upload_file",
+    "upload_files",
 ]

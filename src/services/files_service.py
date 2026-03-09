@@ -1,24 +1,26 @@
 from .base_service import BaseService
-from fastapi import UploadFile,status
-from fastapi.responses import JSONResponse
+from fastapi import UploadFile
 import os
 import uuid
 import aiofiles
 import re
-from helpers.config import get_settings,Settings
+from helpers.config import get_settings
 from helpers.enums import Signals
 from helpers.logger import get_logger  
+from repos import  ProjectRepo, FileRepo
+from models import  FileModel
+from typing import List
 
-logger = get_logger("file_service")  # Logger for this layer
+logger = get_logger("self")  # Logger for this layer
 
-class FileService(BaseService):
+class FilesService(BaseService):
     
     def __init__(self):
         super().__init__()
         self.settings = get_settings()
         logger.info("FileService initialized")
 
-    def validate_file(self, file: UploadFile):
+    def _validate_file(self, file: UploadFile):
         logger.debug(f"Validating file: {file.filename if file else 'None'}")
 
         if file is None or file.filename == "":
@@ -36,7 +38,7 @@ class FileService(BaseService):
         logger.info(f"File validated successfully: {file.filename}")
         return True, Signals.FILE_VALID.value
 
-    def get_project_path(self, project_id: str):
+    def _get_project_path(self, project_id: str):
         project_dir = os.path.join(self.files_dir, project_id)
         
         if not os.path.exists(project_dir):
@@ -47,16 +49,16 @@ class FileService(BaseService):
         
         return project_dir    
 
-    def get_clean_filename(self, original_filename: str) -> str:
+    def _get_clean_filename(self, original_filename: str) -> str:
         cln_name = re.sub(r'[^\w.]', '', original_filename)
         cln_name = cln_name.replace(" ","_").lower()
         logger.debug(f"Cleaned filename: {original_filename} -> {cln_name}")
         return cln_name
     
-    def generate_file_path(self, original_filename: str, project_id: str):
+    def _generate_file_path(self, original_filename: str, project_id: str):
         try:
-            project_dir = self.get_project_path(project_id=project_id)
-            file_name = self.get_clean_filename(original_filename=original_filename)
+            project_dir = self._get_project_path(project_id=project_id)
+            file_name = self._get_clean_filename(original_filename=original_filename)
             random_name = str(uuid.uuid4()) + "_" + file_name
             file_path = os.path.join(project_dir, random_name)
             logger.debug(f"Generated file path: {file_path}")
@@ -65,8 +67,8 @@ class FileService(BaseService):
             return e.__str__()
         return file_path, random_name
     
-    async def write_file(self, file: UploadFile, project_id: str):
-        file_path, file_name = self.generate_file_path(original_filename=file.filename, project_id=project_id)
+    async def _write_file(self, file: UploadFile, project_id: str):
+        file_path, file_name = self._generate_file_path(original_filename=file.filename, project_id=project_id)
         logger.info(f"Writing file to path: {file_path}")
 
         try:
@@ -79,3 +81,89 @@ class FileService(BaseService):
             raise
 
         return file_path, file_name
+    
+    async def upload_files(
+        self,
+        project_id: str,
+        db_client,
+        files: List[UploadFile]
+    ):
+
+        project_repo = await ProjectRepo.create_instance(db_client=db_client)
+        file_repo = await FileRepo.create_instance(db_client=db_client)
+
+        project = await project_repo.get_project_or_create_one(project_id=project_id)
+
+        logger.info(
+            f"Using project: {project.project_id} (DB ID: {str(project.iid)})"
+        )
+
+        response_list = []
+
+        for file in files:
+
+            is_valid, signal = self._validate_file(file=file)
+
+            if not is_valid:
+                logger.warning(
+                    f"File validation failed: {file.filename} | Signal: {signal}"
+                )
+
+                response_list.append({
+                    "filename": file.filename,
+                    "status": "error",
+                    "signal": signal
+                })
+
+                continue
+
+            try:
+
+                _, file_name = await self._write_file(
+                    file=file,
+                    project_id=project.project_id
+                )
+
+                file_model = FileModel(
+                    file_name=file_name,
+                    file_size=file.size,
+                    file_project_iid=project.iid
+                )
+
+                saved_file = await file_repo.add_file(file_model)
+
+                logger.info(
+                    f"File saved successfully: {file.filename} as {file_name} | "
+                    f"File ID: {str(saved_file.file_iid)}"
+                )
+
+                response_list.append({
+                    "filename": file.filename,
+                    "status": "success",
+                    "database_filename": file_name,
+                    "file_db_id": str(saved_file.file_iid),
+                    "signal": signal
+                })
+
+            except Exception as e:
+
+                logger.error(
+                    f"Error saving file {file.filename}: {e}",
+                    exc_info=True
+                )
+
+                response_list.append({
+                    "filename": file.filename,
+                    "status": "error",
+                    "signal": str(e)
+                })
+
+        logger.info(
+            f"Files uploaded successfully for project: {project.project_id} "
+            f"(DB ID: {str(project.iid)})"
+        )
+
+        return {
+            "project_db_id": str(project.iid),
+            "files": response_list
+        }   

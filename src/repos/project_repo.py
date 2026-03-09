@@ -4,6 +4,7 @@ from helpers.enums import DBEnum
 from bson import ObjectId
 from helpers.logger import get_logger  # << Added logger
 import logging
+from models import FileModel
 
 logger = get_logger("project_repo", level=logging.DEBUG)  # Logger for this layer
 
@@ -100,7 +101,10 @@ class ProjectRepo(BaseRepo):
             logger.debug(f"Fetching all files for project ID: {file_project_iid} with query: {query}")
             result = await self.collection.find(query).to_list(length=None)
             logger.info(f"Fetched {len(result)} files for project ID: {file_project_iid}")
-            return result
+            return [
+            FileModel(**record)
+            for record in result
+        ]
         except Exception as e:
             logger.error(f"Error fetching project files for ID {file_project_iid}: {e}", exc_info=True)
             raise
