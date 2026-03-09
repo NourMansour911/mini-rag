@@ -10,8 +10,11 @@ class Signals(Enum):
     FILE_INVALID = "File Is Invalid"
     PROCESS_FAILED = "File Process Failed"
     
-    CHUNK_PROCESS_SUCCESS = "Chunk Processed Successfully"
-    CHUNK_PROCESS_FAILED = "Chunk Process Failed"
+    FILE_FETCH_FAILED = "File Fetch Failed"
+    NO_FILES_FETCHED = "No files found for chunking"
+    
+    CHUNKING_SUCCESS = "Chunk Processed Successfully"
+    CHUNKING_FAILED = "Chunk Process Failed"
     CHUNK_RESET_SUCCESS = "Chunks Reset Successfully"
     
     

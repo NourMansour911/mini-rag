@@ -93,18 +93,32 @@ class ProjectRepo(BaseRepo):
             logger.error(f"Error fetching all projects for page {page}: {e}", exc_info=True)
             raise
 
-    async def get_all_project_files(self, file_project_iid: str):
+
+
+
+    async def project_exists(self, project_id: str) -> bool:
+
         try:
-            query = {
-                "file_project_iid": ObjectId(file_project_iid) if isinstance(file_project_iid, str) else file_project_iid
-            }
-            logger.debug(f"Fetching all files for project ID: {file_project_iid} with query: {query}")
-            result = await self.collection.find(query).to_list(length=None)
-            logger.info(f"Fetched {len(result)} files for project ID: {file_project_iid}")
-            return [
-            FileModel(**record)
-            for record in result
-        ]
+            logger.debug(f"Checking existence of project: {project_id}")
+            record = await self.collection.find_one({"project_id": project_id})
+            exists = record is not None
+            logger.info(f"Project {project_id} exists: {exists}")
+            return exists
         except Exception as e:
-            logger.error(f"Error fetching project files for ID {file_project_iid}: {e}", exc_info=True)
-            raise
+            logger.error(f"Error checking existence of project {project_id}: {e}", exc_info=True)
+            return False
+
+    async def delete_project(self, project_id: str) -> bool:
+
+        try:
+            logger.debug(f"Attempting to delete project: {project_id}")
+            result = await self.collection.delete_one({"project_id": project_id})
+            deleted = result.deleted_count > 0
+            if deleted:
+                logger.info(f"Project {project_id} deleted successfully")
+            else:
+                logger.info(f"Project {project_id} not found, nothing deleted")
+            return deleted
+        except Exception as e:
+            logger.error(f"Error deleting project {project_id}: {e}", exc_info=True)
+            return False

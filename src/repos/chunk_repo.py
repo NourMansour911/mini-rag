@@ -45,13 +45,13 @@ class ChunkRepo(BaseRepo):
         
         return ChunkModel(**result)
 
-    async def insert_many_chunks(self, chunks: list, batch_size: int=100):
+    async def insert_many_chunks(self, chunks: list[ChunkModel], batch_size: int=100):
 
         for i in range(0, len(chunks), batch_size):
             batch = chunks[i:i+batch_size]
 
             operations = [
-                InsertOne(chunk.dict(by_alias=True, exclude_none=True))
+                InsertOne(chunk.model_dump(by_alias=True, exclude_none=True))
                 for chunk in batch
             ]
 

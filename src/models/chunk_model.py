@@ -3,12 +3,15 @@ from typing import Optional
 from bson.objectid import ObjectId
 
 class ChunkModel(BaseModel):
-    iid: ObjectId = Field(..., alias="_id")
+    iid: Optional[ObjectId] = Field(None, alias="_id")
     chunk_text: str = Field(..., min_length=1)
     chunk_metadata: Optional[dict] = None 
     chunk_order: int = Field(..., gt=0)
+    chunk_id: Optional[str] = None
+    chunk_type: Optional[str] = None
+    chunk_file_name: Optional[str]
+    chunk_file_iid: Optional[ObjectId] 
     chunk_project_iid: ObjectId
-    chunk_file_iid: Optional[ObjectId] = None 
 
     model_config = {  
         "arbitrary_types_allowed": True, 
@@ -20,8 +23,8 @@ class ChunkModel(BaseModel):
     def get_indexes(cls):
         return [
             {
-                "key": [("chunk_project_id", 1)],
-                "name": "chunk_project_id_index_1",
+                "key": [("chunk_project_iid", 1)],
+                "name": "chunk_project_iid_index_1",
                 "unique": False
             }
         ]

@@ -16,7 +16,20 @@ class UploadResponse(BaseModel):
     files: List[FileUploadResult]
     
 class ChunkingRequest(BaseModel):
-    file_ids: list[str] = None
+    files_names: list[str] = None
     chunk_size: Optional[int] = 400
-    overlap_size: Optional[int] = 20
+    chunk_overlap: Optional[int] = 20
     do_reset: Optional[int] = 0
+
+
+class FileChunkingResult(BaseModel):
+    file_name: str
+    status: str
+    signal: Optional[str] = None
+
+
+class FileChunkingResponse(BaseModel):
+    project_db_id: str
+    no_of_files: int
+    no_of_inserted_chunks: int
+    files: List[FileChunkingResult]

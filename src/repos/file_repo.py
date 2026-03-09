@@ -5,6 +5,8 @@ from helpers.enums import DBEnum
 from helpers.logger import get_logger  # << Added logger
 import logging
 
+from bson import ObjectId
+
 logger = get_logger("file_repo", level=logging.DEBUG)  # Logger for this layer
 
 class FileRepo(BaseRepo):
@@ -44,7 +46,7 @@ class FileRepo(BaseRepo):
         except Exception as e:
             logger.error(f"Error initializing collection {DBEnum.COLLECTION_FILE_NAME.value}: {e}", exc_info=True)
             raise
-
+        
     async def add_file(self, file: FileModel):
         try:
             result = await self.collection.insert_one(file.model_dump(by_alias=True, exclude_none=True))
@@ -54,4 +56,33 @@ class FileRepo(BaseRepo):
         except Exception as e:
             logger.error(f"Error adding file: {e}", exc_info=True)
             raise
+        
+    async def get_file(self, project_iid: str, file_name: str) -> FileModel | None:
+
+        record = await self.collection.find_one({
+            "file_project_iid": ObjectId(project_iid) if isinstance(project_iid, str) else project_iid,
+            "file_name": file_name,
+        })
+
+        if record:
+            return FileModel(**record)
+        
+        return None
+
+    async def get_all_project_files(self, project_iid: str) -> list[FileModel] | None:
+        try:
+            query = {
+                "file_project_iid": ObjectId(project_iid) if isinstance(project_iid, str) else project_iid
+            }
+            logger.debug(f"Fetching all files for project ID: {project_iid} with query: {query}")
+            result = await self.collection.find(query).to_list(length=None)
+            logger.info(f"Fetched {len(result)} files for project ID: {project_iid}")
+            return [
+            FileModel(**record)
+            for record in result
+        ]
+        except Exception as e:
+            logger.error(f"Error fetching project files for ID {project_iid}: {e}", exc_info=True)
+            return None
+
     
