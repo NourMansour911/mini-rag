@@ -3,6 +3,7 @@ from models import ChunkModel
 from helpers.enums import DBEnum
 from bson.objectid import ObjectId
 from pymongo import InsertOne
+from fastapi import Depends
 
 class ChunkRepo(BaseRepo):
 
@@ -67,5 +68,5 @@ class ChunkRepo(BaseRepo):
         return result.deleted_count
     
     
-
-    
+async def  get_chunk_repo(db_client: object = Depends(BaseRepo.get_db_client)):
+    return await ChunkRepo.create_instance(db_client=db_client)

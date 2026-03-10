@@ -7,6 +7,8 @@ import logging
 
 from bson import ObjectId
 
+from fastapi import Depends
+
 logger = get_logger("file_repo", level=logging.DEBUG)  # Logger for this layer
 
 class FileRepo(BaseRepo):
@@ -85,4 +87,5 @@ class FileRepo(BaseRepo):
             logger.error(f"Error fetching project files for ID {project_iid}: {e}", exc_info=True)
             return None
 
-    
+async def get_file_repo(db_client: object = Depends(BaseRepo.get_db_client)):
+    return await FileRepo.create_instance(db_client=db_client)

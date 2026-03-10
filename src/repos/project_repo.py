@@ -1,10 +1,10 @@
 from repos import BaseRepo
 from models import ProjectModel
 from helpers.enums import DBEnum
-from bson import ObjectId
 from helpers.logger import get_logger  # << Added logger
 import logging
-from models import FileModel
+from fastapi import Depends
+
 
 logger = get_logger("project_repo", level=logging.DEBUG)  # Logger for this layer
 
@@ -122,3 +122,7 @@ class ProjectRepo(BaseRepo):
         except Exception as e:
             logger.error(f"Error deleting project {project_id}: {e}", exc_info=True)
             return False
+        
+        
+async def get_project_repo(db_client: object = Depends(BaseRepo.get_db_client)):
+    return await ProjectRepo.create_instance(db_client=db_client)

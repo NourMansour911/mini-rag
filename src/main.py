@@ -1,8 +1,10 @@
 from routers import base,files
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
-from helpers.config import get_settings
+from helpers.settings import get_settings
 from contextlib import asynccontextmanager
+
+from routers import vdb
 
 
 
@@ -23,3 +25,4 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(base.base_router)
 app.include_router(files.files_router)
+app.include_router(vdb.vdb_router)
