@@ -1,6 +1,6 @@
-from .base_service import BaseService
 from helpers.enums import Signals
 from helpers.logger import get_logger  
+from helpers.settings import get_settings
 from helpers.files_helper import process_file_content,get_file_loader,generate_file_path
 
 
@@ -20,12 +20,13 @@ logger = get_logger(__name__)
 
 
 
-class FilesService(BaseService):
+class FilesService():
     def __init__(self,project_repo: ProjectRepo,file_repo: FileRepo,chunk_repo: ChunkRepo):
         super().__init__()
         self.project_repo = project_repo
         self.file_repo = file_repo
         self.chunk_repo = chunk_repo
+        self.settings = get_settings()
 
     async def upload_files(
         self,

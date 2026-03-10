@@ -1,4 +1,3 @@
-from .base_service import BaseService
 from helpers.logger import get_logger  
 
 from repos import  ProjectRepo, FileRepo, ChunkRepo
@@ -14,7 +13,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 logger = get_logger(__name__)  
 
-class VDBService(BaseService):
+class VDBService():
     
     def __init__(self,project_id: str,request_schema: PushRequest,db_client,vdb_client,generation_client,embedding_client):
         super().__init__()
