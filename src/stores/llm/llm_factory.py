@@ -12,17 +12,17 @@ class LLMFactory:
             return OpenAIProvider(
                 api_key = self.settings.OPENAI_API_KEY,
                 api_url = self.settings.OPENAI_API_URL,
-                default_input_max_characters=2048,
-                default_generation_max_output_tokens=500,
-                default_generation_temperature=0.7
+                default_input_max_chars=2048,
+                default_out_max_tokens=500,
+                default_temperature=0.7
             )
 
         if provider == "COHERE":
             return CoHereProvider(
                 api_key = self.settings.COHERE_API_KEY,
-                default_input_max_characters=2048,
-                default_generation_max_output_tokens=500,
-                default_generation_temperature=0.7
+                default_input_max_chars=2048,
+                default_out_max_tokens=500,
+                default_temperature=0.7
             )
 
         return None

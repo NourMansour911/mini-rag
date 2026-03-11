@@ -23,7 +23,7 @@ class ChunkingRequest(BaseModel):
 
 
 class FileChunkingResult(BaseModel):
-    file_name: str
+    filename: str
     status: str
     signal: Optional[str] = None
 

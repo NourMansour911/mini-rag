@@ -1,7 +1,7 @@
-from LLMInterface import LLMInterface
+from ..llm_interface import LLMInterface
 from openai import OpenAI
 from helpers import get_logger
-from LLMEnums import OpenAIEnums
+from ..llm_enums import OpenAIEnums
 
 logger = get_logger(__name__)
 

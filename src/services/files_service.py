@@ -174,7 +174,7 @@ class FilesService():
             
             try:
 
-               file_chunks = self._create_chunks(file_name=file.file_name,chunk_size=request_schema.chunk_size,chunk_overlap=request_schema.chunk_overlap,project_id=project_id)
+               file_chunks = self._create_chunks(project_id=project_id,file_name=file.file_name,chunk_size=request_schema.chunk_size,chunk_overlap=request_schema.chunk_overlap)
                
                file_chunks_records = [
                ChunkModel(
@@ -194,7 +194,7 @@ class FilesService():
                
                logger.info(f"File {file.file_name} chunked successfully")
                response_list.append({
-                   "file_name": file.file_name,
+                   "filename": file.file_name,
                    "status": "success",
                    "signal": Signals.CHUNKING_SUCCESS.value
                })
@@ -267,7 +267,7 @@ class FilesService():
         
         return file_chunks
     
-    def get_file_loader(project_id: str,file_name:str):
+    def get_file_loader(self,project_id: str,file_name:str):
         file_ext = os.path.splitext(file_name)[-1]
         file_path = os.path.join(
             get_project_path(project_id=project_id),
@@ -282,7 +282,7 @@ class FilesService():
         return None
 
 
-    def process_file_content(content:list,chunk_size: int,chunk_overlap: int):
+    def process_file_content(self,content:list,chunk_size: int,chunk_overlap: int):
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size,chunk_overlap=chunk_overlap,length_function=len)
         
         

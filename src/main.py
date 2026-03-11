@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.settings import get_settings
 from contextlib import asynccontextmanager
-from stores.llm.LLMFactory import LLMFactory
+from stores.llm.llm_factory import LLMFactory
 from routers import vdb
 
 

@@ -1,20 +1,20 @@
-from ..LLMInterface import LLMInterface
-from ..LLMEnums import CoHereEnums, DocumentTypeEnum
+from ..llm_interface import LLMInterface
+from ..llm_enums import CoHereEnums, DocumentTypeEnum
 import cohere
 import logging
 
 class CoHereProvider(LLMInterface):
 
     def __init__(self, api_key: str,
-                       default_input_max_characters,
-                       default_generation_max_output_tokens,
-                       default_generation_temperature):
+                       default_input_max_chars,
+                       default_out_max_tokens,
+                       default_temperature):
         
         self.api_key = api_key
 
-        self.default_input_max_characters = default_input_max_characters
-        self.default_generation_max_output_tokens = default_generation_max_output_tokens
-        self.default_generation_temperature = default_generation_temperature
+        self.default_input_max_characters = default_input_max_chars
+        self.default_generation_max_output_tokens = default_out_max_tokens
+        self.default_generation_temperature = default_temperature
 
         self.generation_model_id = None
 

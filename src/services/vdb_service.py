@@ -6,8 +6,6 @@ from schemas import PushRequest
 
 from fastapi import HTTPException, status,Depends
 
-import os
-
 
 from repos import  ProjectRepo, FileRepo, ChunkRepo,get_chunk_repo,get_file_repo,get_project_repo
 
