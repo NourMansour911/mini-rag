@@ -8,7 +8,9 @@ from .main import lifespan
 from . import models
 from . import repos
 from . import routers
+from . import schemas
 from . import services
+from . import stores
 
 __all__ = [
     "assets",
@@ -18,6 +20,8 @@ __all__ = [
     "models",
     "repos",
     "routers",
+    "schemas",
     "services",
+    "stores",
     "lifespan",
 ]

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.settings import get_settings
 from contextlib import asynccontextmanager
-
+from stores.llm.LLMFactory import LLMFactory
 from routers import vdb
 
 
@@ -11,8 +11,21 @@ from routers import vdb
 @asynccontextmanager
 async def lifespan(app: FastAPI):
   settings = get_settings()
+  
+  # MongoDB client
   app.client = AsyncIOMotorClient(settings.MONGODB_URL)
   app.db_client = app.client[settings.MONGODB_DATABASE]
+
+  # Generation client
+  llm_provider_factory = LLMFactory(settings)
+  
+  app.generation_client = llm_provider_factory.create(provider=settings.GENERATION_BACKEND)
+  app.generation_client.set_generation_model(model_id = settings.GENERATION_MODEL_ID)
+
+  # Embedding client
+  app.embedding_client = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
+  app.embedding_client.set_embedding_model(model_id=settings.EMBEDDING_MODEL_ID,
+                                           embedding_size=settings.EMBEDDING_MODEL_SIZE)
   
   yield
   

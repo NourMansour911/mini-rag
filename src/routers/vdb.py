@@ -1,11 +1,9 @@
 from fastapi import APIRouter, UploadFile, Request,File,Depends
 
 from typing import List
-import logging
-from models.schemas import PushRequest
+from schemas import PushRequest,ChunkingRequest
 from helpers.logger import get_logger
-
-from models.schemas import ChunkingRequest
+from services import VDBService
 
 logger = get_logger(__name__)
 

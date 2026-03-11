@@ -2,42 +2,42 @@ from helpers.logger import get_logger
 
 from repos import  ProjectRepo, FileRepo, ChunkRepo
 from models import  ProjectModel
-from models.schemas import PushRequest
+from schemas import PushRequest
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status,Depends
 
 import os
 
-from langchain_community.document_loaders import PyPDFLoader,TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from repos import  ProjectRepo, FileRepo, ChunkRepo,get_chunk_repo,get_file_repo,get_project_repo
 
 logger = get_logger(__name__)  
 
 class VDBService():
     
-    def __init__(self,project_id: str,request_schema: PushRequest,db_client,vdb_client,generation_client,embedding_client):
+    def __init__(self,project_repo: ProjectRepo,file_repo: FileRepo,chunk_repo: ChunkRepo, vdb_client,generation_client,embedding_client):
         super().__init__()
-        self.project_id = project_id
-        self.request_schema = request_schema
-        self.db_client = db_client
+        self.project_repo = project_repo
+        self.file_repo = file_repo
+        self.chunk_repo = chunk_repo
         self.vdb_client = vdb_client
         self.generation_client = generation_client
         self.embedding_client = embedding_client
-        self.collection_name = f"collection_{self.project_id}".strip()
+        self.collection_name = None
+
         logger.info("NLP Push Service initialized")
 
-    async def vdb_push(self):
-        project_repo = await ProjectRepo.create_instance(db_client=self.db_client)
-        file_repo = await FileRepo.create_instance(db_client=self.db_client)
-        chunk_repo = await ChunkRepo.create_instance(db_client=self.db_client)
+
+    async def vdb_push(self,project_id: str,request_schema: PushRequest):
+        self.collection_name = f"collection_{project_id}".strip()
         
-        if await project_repo.project_exists(project_id=self.project_id) == False:
+        if await self.project_repo.project_exists(project_id=self.project_id) == False:
             raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Project [{self.project_id}] does not exist"
             )
         
-        project = await project_repo.get_project_or_create_one(project_id=self.project_id)
+        project = await self.project_repo.get_project_or_create_one(project_id=self.project_id)
     
     
     def _reset_vdb_collection(self):
@@ -47,3 +47,5 @@ class VDBService():
         return self.vdb_client.get_collection_info(self.collection_name)
 
              
+def get_vdb_service(project_repo: ProjectRepo = Depends(get_project_repo),file_repo: FileRepo = Depends(get_file_repo),chunk_repo: ChunkRepo = Depends(get_chunk_repo)):
+    return VDBService(project_repo=project_repo,file_repo=file_repo,chunk_repo=chunk_repo)

@@ -1,9 +1,8 @@
 from fastapi import APIRouter, UploadFile, Request,File,Depends
 
 from typing import List
-from models.schemas import UploadResponse,FileChunkingResponse
+from schemas import UploadResponse,FileChunkingResponse,ChunkingRequest
 from helpers.logger import get_logger
-from models.schemas import ChunkingRequest
 from services import FilesService,get_files_service
 
 
