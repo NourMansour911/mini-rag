@@ -71,7 +71,8 @@ class FilesService():
                 file_model = FileModel(
                     file_name=file_name,
                     file_size=file.size,
-                    file_project_iid=project.iid
+                    file_project_iid=project.iid,
+                    file_original_name=file.filename
                 )
 
                 saved_file = await self.file_repo.add_file(file_model)

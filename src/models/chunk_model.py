@@ -10,7 +10,7 @@ class ChunkModel(BaseModel):
     chunk_id: Optional[str] = None
     chunk_type: Optional[str] = None
     chunk_file_name: Optional[str]
-    chunk_file_iid: Optional[ObjectId] 
+    chunk_file_iid: Optional[ObjectId]
     chunk_project_iid: ObjectId
 
     model_config = {  

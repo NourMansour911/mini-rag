@@ -6,6 +6,14 @@ from schemas import PushRequest
 
 from fastapi import HTTPException, status,Depends
 
+from stores import get_vdb_client,get_generation_client,get_embedding_client
+from stores.llm import LLMInterface,DocumentTypeEnum
+from stores.vector_db import VectorDBInterface
+
+
+from models import ChunkModel
+
+
 
 from repos import  ProjectRepo, FileRepo, ChunkRepo,get_chunk_repo,get_file_repo,get_project_repo
 
@@ -13,7 +21,7 @@ logger = get_logger(__name__)
 
 class VDBService():
     
-    def __init__(self,project_repo: ProjectRepo,file_repo: FileRepo,chunk_repo: ChunkRepo, vdb_client,generation_client,embedding_client):
+    def __init__(self,project_repo: ProjectRepo,file_repo: FileRepo,chunk_repo: ChunkRepo, vdb_client: VectorDBInterface,generation_client: LLMInterface,embedding_client: LLMInterface):
         super().__init__()
         self.project_repo = project_repo
         self.file_repo = file_repo
@@ -21,29 +29,53 @@ class VDBService():
         self.vdb_client = vdb_client
         self.generation_client = generation_client
         self.embedding_client = embedding_client
-        self.collection_name = None
 
-        logger.info("NLP Push Service initialized")
+        logger.info("Vector DB Push Service initialized")
 
 
     async def vdb_push(self,project_id: str,request_schema: PushRequest):
-        self.collection_name = f"collection_{project_id}".strip()
-        
-        if await self.project_repo.project_exists(project_id=self.project_id) == False:
+
+        if await self.project_repo.project_exists(project_id=project_id) == False:
             raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Project [{self.project_id}] does not exist"
+            detail=f"Project [{project_id}] does not exist"
             )
         
-        project = await self.project_repo.get_project_or_create_one(project_id=self.project_id)
+        project = await self.project_repo.get_project_or_create_one(project_id=project_id)
+        
+        
     
     
-    def _reset_vdb_collection(self):
-        return self.vdb_client.delete_collection(self.collection_name)
-    
-    def _get_vdb_collection_info(self):
-        return self.vdb_client.get_collection_info(self.collection_name)
+    def _index_into_vdb(self,project_id: str,chunks: list[ChunkModel],do_reset: bool = False):
+        collection_name = self._create_collection_name(project_id=project_id)
+        
+        texts = [chunk.chunk_text for chunk in chunks]
+        metadata = [chunk.chunk_metadata for chunk in chunks]
+        vectors = [self.embedding_client.embed_text(text=text,document_type=DocumentTypeEnum.DOCUMENT.value) for text in texts]
+        
+        
+        _ = self.vdb_client.create_collection(collection_name=collection_name,embedding_size=self.embedding_client.embedding_size,do_reset=do_reset)
+        
+        _ = self.vdb_client.insert_many(collection_name=collection_name, texts=texts, vectors=vectors, metadata=metadata)
+        
+        
+        return True
 
-             
-def get_vdb_service(project_repo: ProjectRepo = Depends(get_project_repo),file_repo: FileRepo = Depends(get_file_repo),chunk_repo: ChunkRepo = Depends(get_chunk_repo)):
-    return VDBService(project_repo=project_repo,file_repo=file_repo,chunk_repo=chunk_repo)
+    
+    def _create_collection_name(self,project_id: str):
+        return f"collection_{project_id}".strip()
+
+    def _reset_vdb_collection(self,project_id: str):
+        collection_name = self._create_collection_name(project_id=project_id)
+        return self.vdb_client.delete_collection(collection_name)
+    
+    def _get_vdb_collection_info(self,project_id: str):
+        collection_name = self._create_collection_name(project_id=project_id)
+        return self.vdb_client.get_collection_info(collection_name)
+
+
+        
+
+def get_vdb_service(project_repo: ProjectRepo = Depends(get_project_repo),file_repo: FileRepo = Depends(get_file_repo),chunk_repo: ChunkRepo = Depends(get_chunk_repo),
+                    vdb_client = Depends(get_vdb_client)  ,generation_client = Depends(get_generation_client,),embedding_client = Depends(get_embedding_client)):
+    return VDBService(project_repo=project_repo,file_repo=file_repo,chunk_repo=chunk_repo,vdb_client=vdb_client,generation_client=generation_client,embedding_client=embedding_client)
