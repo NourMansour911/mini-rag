@@ -46,6 +46,22 @@ class ChunkRepo(BaseRepo):
         
         return ChunkModel(**result)
 
+    async def get_project_chunks(self, project_iid: ObjectId,page:int=1,page_size:int=50):
+
+        result = await self.collection.find({
+            "chunk_project_iid": project_iid
+        }).skip((page-1) * page_size).limit(page_size).to_list(length=None)
+
+        return [ChunkModel(**record) for record in result]
+    
+    async def get_file_chunks(self, file_iid:ObjectId,page:int=1,page_size:int=50):
+        result = await self.collection.find({
+            "chunk_file_iid": file_iid
+        }).skip((page-1) * page_size).limit(page_size).to_list(length=None)
+        
+        return [ChunkModel(**record) for record in result]
+    
+    
     async def insert_many_chunks(self, chunks: list[ChunkModel], batch_size: int=100):
 
         for i in range(0, len(chunks), batch_size):

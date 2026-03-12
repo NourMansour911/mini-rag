@@ -11,7 +11,9 @@ from stores.llm import LLMInterface,DocumentTypeEnum
 from stores.vector_db import VectorDBInterface
 
 
-from models import ChunkModel
+from models import ChunkModel,FileModel
+from typing import List
+from helpers.enums import Signals
 
 
 
@@ -43,6 +45,50 @@ class VDBService():
         
         project = await self.project_repo.get_project_or_create_one(project_id=project_id)
         
+        
+        if request_schema.do_reset == 1:
+            await self.chunk_repo.delete_chunks_by_project_id(project_iid=project.iid) 
+        
+        files_names = request_schema.files_names
+        
+        response_list = []
+        files: List[FileModel] = []
+        errors = []
+        
+        if files_names is None:
+            try:
+                files = await self.file_repo.get_all_project_files(project_iid=project.iid)
+            except Exception as e:
+                logger.error(f"Error fetching project files for ID {project_id}: {e}", exc_info=True)
+                raise  
+        else:        
+                for file_name in files_names:
+                    try:
+                        file = await self.file_repo.get_file(file_name=file_name, project_iid=project.iid)
+                        if file is None:
+                            errors.append(f"File [{file_name}] does not exist")
+                            continue  
+                        files.append(file)
+                    except Exception as e:
+                        logger.error(f"Error fetching file {file_name} for project {project_id}: {e}", exc_info=True)
+                        errors.append(f"File [{file_name}] error: {str(e)}")
+
+                if errors:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=errors
+                    )
+                    
+                    
+
+        if len(files) == 0 and request_schema.do_reset == 0:
+            logger.error("No files found for chunking")
+            response_list.append({
+                    "filename": None,
+                    "status": "error",
+                    "signal": Signals.NO_FILES_FETCHED.value
+                })
+            return
         
     
     
