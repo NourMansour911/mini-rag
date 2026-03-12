@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from bson.objectid import ObjectId
-
+from datetime import datetime
 class ChunkModel(BaseModel):
     iid: Optional[ObjectId] = Field(None, alias="_id")
     chunk_text: str = Field(..., min_length=1)
@@ -12,6 +12,7 @@ class ChunkModel(BaseModel):
     chunk_file_name: Optional[str]
     chunk_file_iid: Optional[ObjectId]
     chunk_project_iid: ObjectId
+    chunk_pushed_at: datetime = Field(default=datetime.now())
 
     model_config = {  
         "arbitrary_types_allowed": True, 
