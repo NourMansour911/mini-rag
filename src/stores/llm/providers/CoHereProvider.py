@@ -5,10 +5,12 @@ import logging
 
 class CoHereProvider(LLMInterface):
 
-    def __init__(self, api_key: str,
-                       default_input_max_chars,
-                       default_out_max_tokens,
-                       default_temperature):
+    def __init__(self,
+                api_key:str,
+                default_input_max_chars=2048,
+                default_out_max_tokens=500,
+                default_temperature=0.7,
+                ):
         
         self.api_key = api_key
 

@@ -7,7 +7,13 @@ logger = get_logger(__name__)
 
 
 class OpenAIProvider(LLMInterface):
-    def __init__(self,api_key:str,default_input_max_chars,default_out_max_tokens,default_temperature,api_url:str=None):
+    def __init__(self,
+                api_key:str,
+                api_url:str=None,
+                default_input_max_chars=2048,
+                default_out_max_tokens=500,
+                default_temperature=0.7,
+                ):
         self.api_key = api_key
         self.api_url = api_url
         self.default_input_max_chars = default_input_max_chars
@@ -69,7 +75,7 @@ class OpenAIProvider(LLMInterface):
         return response.choices[0].message.content
 
     
-    def embed_text(self,text:str,doc_type:str):
+    def embed_text(self,text:str,document_type:str):
         
         if not self.client:
             logger.error("OpenAI Client not initialized")

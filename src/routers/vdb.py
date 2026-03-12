@@ -8,16 +8,13 @@ from services import VDBService,get_vdb_service
 logger = get_logger(__name__)
 
 vdb_router = APIRouter(
-    prefix="/api/nlp",
-    tags=["api_v1", "nlp"],
+    prefix="/api/vdb",
+    tags=["api_v1", "vdb"],
 )
 
 
 
-def get_db_client(request: Request):
-    return request.app.db_client
-
-@vdb_router.post("/vdb/push/{project_id}",response_model=PushResponse)
-async def vdb_push(project_id: str,request_schema: PushRequest ,service: VDBService = Depends(get_files_service)):
+@vdb_router.post("/push/{project_id}",response_model=PushResponse)
+async def vdb_push(project_id: str,request_schema: PushRequest ,service: VDBService = Depends(get_vdb_service)):
 
     return await service.vdb_push(project_id=project_id,request_schema=request_schema) 

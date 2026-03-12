@@ -53,8 +53,10 @@ class VDBService:
 
         idx = 0
         inserted_chunks = 0
+        files: List[FileModel] = []
+        errors = []
 
-
+        logger.info(request_schema.files_names)
         if not request_schema.files_names:
 
             page = 1
@@ -81,62 +83,58 @@ class VDBService:
                 "no_of_inserted_chunks": inserted_chunks,
                 "signal": Signals.CHUNK_VECTORIZE_SUCCESS.value
             }
+        else:
+            for file_name in request_schema.files_names:
 
-
-        files: List[FileModel] = []
-        errors = []
-
-        for file_name in request_schema.files_names:
-
-            file = await self.file_repo.get_file(
-                file_name=file_name,
-                project_iid=project.iid
-            )
-
-            if not file:
-                errors.append(f"File [{file_name}] does not exist")
-            else:
-                files.append(file)
-
-        if errors:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=errors
-            )
-
-        files_processed = 0
-
-        for file in files:
-
-            page = 1
-
-            while True:
-
-                chunks = await self.chunk_repo.get_file_chunks(
-                    file_iid=file.file_iid,
-                    page=page
+                file = await self.file_repo.get_file(
+                    file_name=file_name,
+                    project_iid=project.iid
                 )
 
-                has_records, idx, inserted = await self._process_chunks_batch(
-                    collection_name=collection_name,
-                    chunks=chunks,
-                    idx=idx
+                if not file:
+                    errors.append(f"File [{file_name}] does not exist")
+                else:
+                    files.append(file)
+
+            if errors:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=errors
                 )
 
-                if not has_records:
-                    break
+            files_processed = 0
 
-                inserted_chunks += inserted
-                page += 1
+            for file in files:
 
-            files_processed += 1
+                page = 1
 
-        return {
-            "no_of_inserted_chunks": inserted_chunks,
-            "signal": Signals.CHUNK_VECTORIZE_SUCCESS.value,
-            "files_names": [f.file_name for f in files],
-            "no_of_files": files_processed
-        }
+                while True:
+
+                    chunks = await self.chunk_repo.get_file_chunks(
+                        file_iid=file.file_iid,
+                        page=page
+                    )
+
+                    has_records, idx, inserted = await self._process_chunks_batch(
+                        collection_name=collection_name,
+                        chunks=chunks,
+                        idx=idx
+                    )
+
+                    if not has_records:
+                        break
+
+                    inserted_chunks += inserted
+                    page += 1
+
+                files_processed += 1
+
+            return {
+                "no_of_inserted_chunks": inserted_chunks,
+                "signal": Signals.CHUNK_VECTORIZE_SUCCESS.value,
+                "files_names": [f.file_name for f in files],
+                "no_of_files": files_processed
+            }
 
     async def _process_chunks_batch(
         self,
