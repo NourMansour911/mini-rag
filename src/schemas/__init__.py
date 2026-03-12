@@ -8,6 +8,7 @@ from .files_schema import FileUploadResult
 from .files_schema import UploadResponse
 from . import vdb_schema
 from .vdb_schema import PushRequest
+from .vdb_schema import PushResponse
 
 __all__ = [
     "files_schema",
@@ -17,5 +18,6 @@ __all__ = [
     "FileChunkingResult",
     "FileUploadResult",
     "PushRequest",
+    "PushResponse",
     "UploadResponse",
 ]

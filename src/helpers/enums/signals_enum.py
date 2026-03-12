@@ -16,5 +16,10 @@ class Signals(Enum):
     CHUNKING_SUCCESS = "Chunk Processed Successfully"
     CHUNKING_FAILED = "Chunk Process Failed"
     CHUNK_RESET_SUCCESS = "Chunks Reset Successfully"
+    NO_CHUNKS_FETCHED = "No CHUNKS found for chunking"
+    
+    CHUNK_VECTORIZE_SUCCESS = "Chunks Vectorized Successfully"
+    CHUNK_VECTORIZE_FAILED = "Chunks Vectorize Failed"
+
     
     

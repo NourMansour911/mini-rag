@@ -51,15 +51,40 @@ class VDBService():
         
         files_names = request_schema.files_names
         
-        response_list = []
+ 
         files: List[FileModel] = []
+        has_records = True
+        page_no = 1
         errors = []
+        no_of_inserted_chunks = 0
+        no_of_files = 0
         
         if files_names is None:
             try:
-                files = await self.file_repo.get_all_project_files(project_iid=project.iid)
+                while has_records:
+                        page_chunks = await self.chunk_repo.get_project_chunks(project_iid=project.iid,page=page_no) 
+                        if len(page_chunks) :
+                            page_no += 1
+                            
+                        if not page_chunks or len(page_chunks) == 0:
+                            has_records = False
+                            break
+                        
+                        is_inserted = self._index_into_vdb(project_id=project_id,chunks=page_chunks,do_reset=request_schema.do_reset)
+                        
+                        if not is_inserted:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=Signals.CHUNK_VECTORIZE_FAILED.value
+                                )
+                            
+                        no_of_inserted_chunks += len(page_chunks)
+                        
+                return {"no_of_inserted_chunks": no_of_inserted_chunks,
+                    "signal": Signals.CHUNK_VECTORIZE_SUCCESS.value}
+                
             except Exception as e:
-                logger.error(f"Error fetching project files for ID {project_id}: {e}", exc_info=True)
+                logger.error(f"Error fetching project chunks for ID {project_id}: {e}", exc_info=True)
                 raise  
         else:        
                 for file_name in files_names:
@@ -79,17 +104,25 @@ class VDBService():
                         detail=errors
                     )
                     
+                for file in files:
+                    chunks = await self.chunk_repo.get_file_chunks(file_iid=file.iid)
+                    is_inserted = self._index_into_vdb(project_id=project_id,chunks=chunks,do_reset=request_schema.do_reset)
                     
-
-        if len(files) == 0 and request_schema.do_reset == 0:
-            logger.error("No files found for chunking")
-            response_list.append({
-                    "filename": None,
-                    "status": "error",
-                    "signal": Signals.NO_FILES_FETCHED.value
-                })
-            return
+                    if not is_inserted:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=Signals.CHUNK_VECTORIZE_FAILED.value
+                            )
+                    
+                    no_of_inserted_chunks += len(chunks)
+                    no_of_files += 1
+                
+                return {"no_of_inserted_chunks": no_of_inserted_chunks,
+                        "signal": Signals.CHUNK_VECTORIZE_SUCCESS.value,
+                        "files_names": [file.file_name for file in files],
+                        "no_of_files": no_of_files}
         
+    
     
     
     def _index_into_vdb(self,project_id: str,chunks: list[ChunkModel],do_reset: bool = False):
