@@ -21,5 +21,5 @@ class Signals(Enum):
     CHUNK_VECTORIZE_SUCCESS = "Chunks Vectorized Successfully"
     CHUNK_VECTORIZE_FAILED = "Chunks Vectorize Failed"
 
-    
+    QUERY_VECTORIZE_FAILED = "Query Vectorize Failed"
     

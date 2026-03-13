@@ -6,6 +6,8 @@ from .files_service import get_files_service
 from . import vdb_service
 from .vdb_service import VDBService
 from .vdb_service import get_vdb_service
+from .vdb_service import get_vdb_service_only
+from .vdb_service import get_vdb_service_light
 
 __all__ = [
     "files_service",
@@ -14,4 +16,6 @@ __all__ = [
     "VDBService",
     "get_files_service",
     "get_vdb_service",
+    "get_vdb_service_only",
+    "get_vdb_service_light",
 ]

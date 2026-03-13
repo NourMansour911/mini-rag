@@ -1,7 +1,7 @@
 from helpers.logger import get_logger
 from repos import ProjectRepo, FileRepo, ChunkRepo
 from models import ChunkModel, FileModel
-from schemas import PushRequest
+from schemas import PushRequest,SearchRequest
 from fastapi import HTTPException, status, Depends
 from stores import get_vdb_client, get_generation_client, get_embedding_client
 from stores.llm import LLMInterface, DocumentTypeEnum
@@ -9,6 +9,7 @@ from stores.vector_db import VectorDBInterface
 from typing import List
 from helpers.enums import Signals
 from repos import get_chunk_repo, get_file_repo, get_project_repo
+import json
 
 logger = get_logger(__name__)
 
@@ -17,12 +18,12 @@ class VDBService:
 
     def __init__(
         self,
-        project_repo: ProjectRepo,
-        file_repo: FileRepo,
-        chunk_repo: ChunkRepo,
         vdb_client: VectorDBInterface,
-        generation_client: LLMInterface,
-        embedding_client: LLMInterface
+        project_repo: ProjectRepo | None = None,
+        file_repo: FileRepo | None = None,
+        chunk_repo: ChunkRepo | None = None,
+        generation_client: LLMInterface | None = None,
+        embedding_client: LLMInterface | None = None
     ):
         self.project_repo = project_repo
         self.file_repo = file_repo
@@ -135,7 +136,41 @@ class VDBService:
                 "files_names": [f.file_name for f in files],
                 "no_of_files": files_processed
             }
+    
+    def vdb_info(self, project_id: str):
+        collection_name = self._create_collection_name(project_id)
+        info = self.vdb_client.get_collection_info(collection_name=collection_name)
+        return json.loads(
+            json.dumps(info,default=lambda x: x.__dict__)
+        )
+    
+    async def vdb_search(self, project_id: str, request_schema: SearchRequest):
+        if not await self.project_repo.project_exists(project_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Project [{project_id}] does not exist"
+            )
 
+        collection_name = self._create_collection_name(project_id)
+        vector = self.embedding_client.embed_text(
+                text=request_schema.query,
+                document_type=DocumentTypeEnum.QUERY.value
+            )
+        
+        if vector is None or len(vector) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=Signals.QUERY_VECTORIZE_FAILED.value
+                )
+            
+        search_results = self.vdb_client.search_by_vector(
+            collection_name=collection_name,
+            vector=vector.tolist(),
+            limit=request_schema.limit
+        )
+        return search_results
+
+        
     async def _process_chunks_batch(
         self,
         collection_name: str,
@@ -189,4 +224,26 @@ def get_vdb_service(
         vdb_client=vdb_client,
         generation_client=generation_client,
         embedding_client=embedding_client
+    )
+
+
+def get_vdb_service_light(
+    vdb_client: VectorDBInterface = Depends(get_vdb_client),
+    embedding_client: LLMInterface = Depends(get_embedding_client),
+    project_repo: ProjectRepo = Depends(get_project_repo),
+):
+    return VDBService(
+        vdb_client=vdb_client,
+        embedding_client=embedding_client,
+        project_repo=project_repo,
+    )
+    
+
+def get_vdb_service_only(
+    vdb_client: VectorDBInterface = Depends(get_vdb_client),
+
+):
+    return VDBService(
+        vdb_client=vdb_client,
+
     )
