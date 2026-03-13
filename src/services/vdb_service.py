@@ -185,7 +185,18 @@ class VDBService:
         idx += len(chunks)
 
         texts = [c.chunk_text for c in chunks]
-        metadata = [c.chunk_metadata for c in chunks]
+        metadata = []
+
+        for chunk in chunks:  
+            
+            metadata.append({
+                "chunk_order": chunk.chunk_order,
+                "chunk_type": chunk.chunk_type,
+                "chunk_file_name": chunk.chunk_file_name,
+                "chunk_file_iid": str(chunk.chunk_file_iid),
+                "chunk_project_iid": str(chunk.chunk_project_iid),
+                "chunk_pushed_at": chunk.chunk_pushed_at
+            })        
 
         vectors = [
             self.embedding_client.embed_text(
