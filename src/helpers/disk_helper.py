@@ -20,10 +20,9 @@ settings = get_settings()
 base_dir = os.path.dirname(os.path.dirname(__file__))
 
 files_dir = os.path.join(base_dir,"assets/files")
-database_dir = os.path.join(base_dir,"assets/database")
+database_dir = os.path.join(base_dir,"assets/databases")
 
 def get_database_path(db_name: str):
-
         database_path = os.path.join(
             database_dir, db_name
         )

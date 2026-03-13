@@ -8,7 +8,6 @@ from routers import vdb
 from stores.vector_db.vdb_factory import VectorDBFactory
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
   settings = get_settings()
