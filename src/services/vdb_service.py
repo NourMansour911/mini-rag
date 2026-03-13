@@ -184,10 +184,18 @@ class VDBService:
         record_ids = list(range(idx, idx + len(chunks)))
         idx += len(chunks)
 
-        texts = [c.chunk_text for c in chunks]
+        texts = []
         metadata = []
+        vectors = []
 
         for chunk in chunks:  
+            
+            vectors.append(self.embedding_client.embed_text(
+                text=chunk.chunk_text,
+                document_type=DocumentTypeEnum.DOCUMENT.value
+            ))
+            
+            texts.append(chunk.chunk_text)
             
             metadata.append({
                 "chunk_order": chunk.chunk_order,
@@ -198,13 +206,6 @@ class VDBService:
                 "chunk_pushed_at": chunk.chunk_pushed_at
             })        
 
-        vectors = [
-            self.embedding_client.embed_text(
-                text=text,
-                document_type=DocumentTypeEnum.DOCUMENT.value
-            )
-            for text in texts
-        ]
 
         self.vdb_client.insert_many(
             collection_name=collection_name,
